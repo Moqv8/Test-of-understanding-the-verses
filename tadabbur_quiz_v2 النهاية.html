@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار تدبر الآيات</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d0d12;font-family:'Cairo',sans-serif;direction:rtl;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.wrap{background:#110d0f;border:1px solid #3a0a12;border-radius:16px;max-width:660px;width:100%;padding:32px 28px;box-shadow:0 0 60px rgba(120,5,25,0.15)}
+
+/* SCREENS */
+.screen{display:none}
+.screen.active{display:block}
+
+/* NAME SCREEN */
+.name-screen{text-align:center;padding:10px 0}
+.logo-flag{font-size:52px;margin-bottom:8px}
+.ns-title{font-family:'Amiri',serif;font-size:26px;color:#f0e0d0;margin-bottom:6px}
+.ns-sub{font-size:13px;color:#7a5a60;margin-bottom:28px;line-height:1.6}
+.ns-label{font-size:14px;color:#a08888;margin-bottom:10px;text-align:right}
+.ns-input{width:100%;background:#160d10;border:1px solid #3a0a12;border-radius:8px;padding:13px 16px;color:#f0e0d0;font-family:'Cairo',sans-serif;font-size:15px;outline:none;transition:border .2s}
+.ns-input:focus{border-color:#c0182b}
+.ns-input::placeholder{color:#4a2830}
+.start-btn{width:100%;background:#7b0d1a;border:none;color:#fff;padding:14px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:16px;font-weight:700;cursor:pointer;margin-top:18px;transition:background .2s;letter-spacing:.3px}
+.start-btn:hover{background:#c0182b}
+.lb-preview{margin-top:26px;border-top:1px solid #2a1820;padding-top:20px}
+.lb-preview-title{font-size:13px;color:#7a5a60;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.lb-preview-title::before{content:'🏆';font-size:15px}
+.lb-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:7px;margin-bottom:6px;background:#160d10;border:1px solid #220d12}
+.lb-rank{font-size:13px;font-weight:700;color:#7b0d1a;min-width:22px}
+.lb-name{font-size:14px;color:#c0a8b0;flex:1;padding:0 10px}
+.lb-pts{font-size:13px;font-weight:700;color:#c0182b}
+.lb-empty{font-size:13px;color:#4a2830;text-align:center;padding:12px}
+
+/* QUIZ SCREEN */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.q-num{font-size:14px;color:#888;font-weight:600}
+.score-pill{font-size:13px;font-weight:700;color:#c0182b;background:rgba(192,24,43,0.12);padding:5px 14px;border-radius:20px;border:1px solid rgba(192,24,43,0.3)}
+.player-badge{font-size:12px;color:#7a5a60;margin-bottom:14px;text-align:left}
+.progress-track{height:3px;background:#1e1220;border-radius:3px;margin-bottom:26px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#6b0a1a,#c0182b);border-radius:3px;transition:width .4s ease}
+.ayah-card{background:#160d10;border:1px solid rgba(192,24,43,0.18);border-right:4px solid #c0182b;border-radius:10px;padding:24px 20px;margin-bottom:22px;text-align:center}
+.ayah-text{font-family:'Amiri',serif;font-size:22px;color:#f0e0d0;line-height:1.9;margin-bottom:10px}
+.ayah-ref{font-size:12px;color:#6a4a50;font-weight:600;letter-spacing:.5px}
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.opt{background:#160d10;border:1px solid #2a1820;color:#c0a8b0;padding:13px 16px;border-radius:8px;text-align:right;cursor:pointer;font-family:'Cairo',sans-serif;font-size:14px;line-height:1.6;transition:all .15s ease}
+.opt:hover:not(:disabled){background:#1e1218;border-color:rgba(192,24,43,0.5);color:#e8d0d5}
+.opt:disabled{cursor:default}
+.opt.correct{background:#0a2010!important;border-color:#27ae60!important;color:#5ae680!important}
+.opt.wrong{background:#200810!important;border-color:#c0182b!important;color:#e87078!important}
+.opt.reveal{background:#0a2010!important;border-color:#27ae60!important;color:#5ae680!important}
+.mark{font-weight:700;margin-left:8px;font-size:15px;opacity:.8}
+.feedback{background:#160d10;border:1px solid rgba(192,24,43,0.22);border-radius:10px;padding:16px 18px;margin-top:2px;display:none;animation:fd .3s ease}
+.fb-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.fb-title.ok{color:#5ae680}
+.fb-title.bad{color:#e87078}
+.fb-body{font-size:13.5px;color:#a08888;line-height:1.75}
+.next-btn{display:none;width:100%;background:#7b0d1a;border:none;color:#fff;padding:13px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:14px;transition:background .2s}
+.next-btn:hover{background:#c0182b}
+
+/* RESULT SCREEN */
+.result-screen{text-align:center;padding:10px 0}
+.res-name{font-size:16px;color:#a08888;margin-bottom:4px}
+.res-big-score{font-family:'Amiri',serif;font-size:72px;color:#c0182b;line-height:1;margin:6px 0}
+.res-of{font-size:16px;color:#6a4a50;margin-bottom:18px}
+.res-eval{font-size:14px;color:#a08888;line-height:1.75;background:#160d10;border:1px solid #2a1820;border-radius:10px;padding:16px 18px;margin-bottom:22px;text-align:right}
+
+/* PALESTINE DEDICATION */
+.dedication{background:#0f0a10;border:1px solid #3a0a12;border-radius:12px;padding:20px 18px;margin-bottom:22px;text-align:center}
+.ded-flags{font-size:36px;margin-bottom:10px;letter-spacing:6px}
+.ded-text{font-family:'Amiri',serif;font-size:18px;color:#f0e0d0;line-height:1.9;margin-bottom:8px}
+.ded-sub{font-size:13px;color:#7a5a60;line-height:1.7}
+
+/* LEADERBOARD RESULT */
+.lb-result-title{font-size:14px;color:#7a5a60;margin-bottom:12px;display:flex;align-items:center;gap:6px;justify-content:center}
+.lb-result-title::before{content:'🏆'}
+.lb-result-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:8px;margin-bottom:6px;background:#160d10;border:1px solid #220d12;transition:all .2s}
+.lb-result-row.me{border-color:#c0182b;background:#1e0810}
+.lb-rrank{font-size:15px;font-weight:700;color:#7b0d1a;min-width:28px}
+.lb-rrank.gold{color:#d4a017;font-size:17px}
+.lb-rrank.silver{color:#9a9a9a;font-size:16px}
+.lb-rrank.bronze{color:#a0622a;font-size:15px}
+.lb-rname{font-size:14px;color:#c0a8b0;flex:1;padding:0 10px}
+.lb-rname.me{color:#f0e0d0;font-weight:700}
+.lb-rpts{font-size:14px;font-weight:700;color:#c0182b}
+
+.res-btns{display:flex;gap:10px;margin-top:6px}
+.restart-btn{flex:1;background:#7b0d1a;border:none;color:#fff;padding:13px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s}
+.restart-btn:hover{background:#c0182b}
+.lb-btn{flex:1;background:#160d10;border:1px solid #3a0a12;color:#c0a8b0;padding:13px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.lb-btn:hover{border-color:#c0182b;color:#f0e0d0}
+
+@keyframes fd{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .4s ease forwards}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- NAME SCREEN -->
+  <div class="screen active" id="screen-name">
+    <div class="name-screen">
+      <div class="logo-flag">📖</div>
+      <div class="ns-title">اختبار تدبر الآيات</div>
+      <div class="ns-sub">ربط القرآن الكريم بالواقع العملي<br>عشرون سؤالاً — كل آية درس حقيقي</div>
+      <div class="ns-label">أدخل اسمك للمتابعة</div>
+      <input class="ns-input" id="player-name-input" type="text" placeholder="اسمك هنا..." maxlength="20" onkeydown="if(event.key==='Enter')startGame()">
+      <button class="start-btn" onclick="startGame()">ابدأ الاختبار ←</button>
+      <div class="lb-preview">
+        <div class="lb-preview-title">المتصدرون</div>
+        <div id="lb-preview-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div class="screen" id="screen-quiz">
+    <div class="header">
+      <span class="q-num" id="qnum">الآية ١ من ٢٠</span>
+      <span class="score-pill" id="scr">النقاط: ٠</span>
+    </div>
+    <div class="player-badge" id="player-badge"></div>
+    <div class="progress-track"><div class="progress-fill" id="prog" style="width:5%"></div></div>
+    <div class="ayah-card">
+      <div class="ayah-text" id="ayah"></div>
+      <div class="ayah-ref" id="ref"></div>
+    </div>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="fb">
+      <div class="fb-title" id="fbt"></div>
+      <div class="fb-body" id="fbb"></div>
+    </div>
+    <button class="next-btn" id="nxt" onclick="nextQ()">التالي ←</button>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div class="screen" id="screen-result">
+    <div class="result-screen">
+      <div class="res-name" id="res-name"></div>
+      <div class="res-big-score pop" id="res-big"></div>
+      <div class="res-of">من ٢٠ آية</div>
+      <div class="res-eval" id="res-eval"></div>
+
+      <!-- DEDICATION -->
+      <div class="dedication">
+        <div class="ded-flags">🇵🇸 🕌 🇵🇸</div>
+        <div class="ded-text">اللهم فرّج عن أهل غزة وفلسطين<br>وانصر المستضعفين في كل مكان</div>
+        <div class="ded-sub">هذا الاختبار مُهدى لأرواح شهداء فلسطين الأبرار<br>ولكل من صمد تحت القصف ولم يُفرّط في دينه وأرضه</div>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div class="lb-result-title">لوحة المتصدرين</div>
+      <div id="lb-result-list"></div>
+
+      <div class="res-btns">
+        <button class="restart-btn" onclick="restart()">إعادة الاختبار</button>
+        <button class="lb-btn" onclick="showNameScreen()">تغيير اللاعب</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const Q=[
+{a:"إِنَّ اللَّهَ لَا يُغَيِّرُ مَا بِقَوْمٍ حَتَّىٰ يُغَيِّرُوا مَا بِأَنفُسِهِمْ",r:"الرعد: ١١",
+opts:["انتظار أن تتعدل الظروف الخارجية وحدها دون أي تدخل منك","البدء بإصلاح قراراتك وسلوكك الداخلي فوراً لتتغير حياتك فعلاً","التذمر المستمر من الواقع بدون خطوة عمل حقيقية"],
+c:1,fb:"التغيير يبدأ من الداخل — تماماً كما لا تصلح الماكينة بمسح كود الخطأ فقط، بل بمعالجة الخلل الأساسي. قرارك أنت هو نقطة الصفر."},
+{a:"فَإِذَا عَزَمْتَ فَتَوَكَّلْ عَلَى اللَّهِ",r:"آل عمران: ١٥٩",
+opts:["الحسم واتخاذ القرار والبدء فوراً مع الاعتماد على الله","التردد الطويل وتأجيل الخطوات خوفاً من الاحتمالات","ترك التخطيط والجلوس بانتظار إشارة خارجية للبدء"],
+c:0,fb:"التوكل يأتي بعد العزم وليس قبله. جهّز العدة، أصلح المحرك، وابدأ التشغيل — لا تقف تحدق في المفتاح إلى الأبد."},
+{a:"وَقُل رَّبِّ زِدْنِي عِلْمًا",r:"طه: ١١٤",
+opts:["الاكتفاء بخبرتك السابقة واعتبار نفسك وصلت","الاستمرارية الدائمة في التعلم ومواكبة كل تطور في مجالك","ظن أنك صرت خبيراً ولا تحتاج لأحد بعد اليوم"],
+c:1,fb:"المحترف الحقيقي يعرف أن العلم بحر. كل موديل سيارة جديد يجلب أنظمة مختلفة — من وقف عن التعلم تركته الصناعة خلفه."},
+{a:"وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا ۝ وَيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ",r:"الطلاق: ٢–٣",
+opts:["الغش في التقارير وتلفيق الأعطال ليبدو الشغل أكثر","الأمانة مع كل زبون مما يفتح أبواب رزق لم تتوقعها","التلاعب بالأسعار لأن السوق يفعلها جميعاً"],
+c:1,fb:"الزبون الذي تعامله بأمانة يُحضر لك ثلاثة زبائن دون أن تدفع درهماً إعلاناً. السمعة النظيفة في الورشة هي أقوى محرك رزق."},
+{a:"وَلَا تَقْفُ مَا لَيْسَ لَكَ بِهِ عِلْمٌ",r:"الإسراء: ٣٦",
+opts:["التخمين العشوائي في تشخيص الأعطال لتبدو واثقاً أمام الزبون","الحديث والتشخيص على أساس حقائق واضحة، وقول 'لا أعلم' عند الجهل","نقل أي معلومة تسمعها في السوق دون تحقق"],
+c:1,fb:"تخمين عطل خاطئ يؤدي لتكسير قطع سليمة وخسارة مزدوجة. التشخيص الصحيح يبدأ من قراءة الكود الفعلي وليس من الاجتهاد."},
+{a:"فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ۝ إِنَّ مَعَ الْعُسْرِ يُسْرًا",r:"الشرح: ٥–٦",
+opts:["الحل والفرج يولدان من قلب الأزمة والضغط نفسه","الاستسلام عند أول عقبة لأن الحل لن يأتي","انتظار انتهاء المشكلة وحدها دون بحث أو تجريب"],
+c:0,fb:"أصعب أعطال المحرك هي التي تعلمك الأعمق. الضغط يولد الخبرة، والتعقيد يُخرج منك الابتكار. الفرج مدفون داخل المشكلة."},
+{a:"وَلَا تَبْخَسُوا النَّاسَ أَشْيَاءَهُمْ",r:"الأعراف: ٨٥",
+opts:["تقليل قيمة شغل وقطع الآخرين للحصول على سعر أرخص","احترام جهد الآخرين وتثمين شغلهم بالعدل وقيمته الحقيقية","التفاوض بالغش وادعاء عيوب غير موجودة في البضاعة"],
+c:1,fb:"إذا كنت تريد أن يحترم الناس شغلك ويدفعوا قيمته الحقيقية، ابدأ أنت بذلك مع غيرك. العدل في السوق يُبنى من طرفين."},
+{a:"وَفِي ذَٰلِكَ فَلْيَتَنَافَسِ الْمُتَنَافِسُونَ",r:"المطففين: ٢٦",
+opts:["التنافس الشريف في الجودة والتطوير لتكون نسخة أحسن من أمس","مراقبة المنافسين باستمرار والتفكير في إسقاطهم","الابتعاد عن أي مجال فيه منافسون وترك الساحة لغيرك"],
+c:0,fb:"المنافسة الحقيقية ليست معركة مع الآخرين — بل سباق مع نفسك. ركز على رفع جودة شغلك، والميدان يُكسب بالإتقان لا بالحقد."},
+{a:"لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ",r:"إبراهيم: ٧",
+opts:["الشكر باللسان فقط مع إهمال الصحة والوقت وتبذيرهما","استثمار النعم (الصحة، العقل، اليد) في مكانها الصحيح لتدوم وتكبر","الشكوى المستمرة وعدم رؤية ما أُعطيت"],
+c:1,fb:"يدك الصحية ووقتك الحر وعقلك الصافي نعم لها ثمن. توظيفها في شغل حقيقي هو الشكر الفعلي — وليس مجرد كلمة على اللسان."},
+{a:"إِنَّا لَا نُضِيعُ أَجْرَ مَنْ أَحْسَنَ عَمَلًا",r:"الكهف: ٣٠",
+opts:["تقفيل الشغل بأعلى جودة ودون عيوب خفية مهما كان الزبون","الاستعجال وإنهاء العمل بنواقص لأن الوقت ضيق","الاعتماد على الحظ وأن الزبون لن يلاحظ الفرق"],
+c:0,fb:"الإحسان هو الإتقان. الورشة التي تسلّم بدون عيوب مخفية تبني اسماً يدوم سنوات. الله لا يضيع الإتقان."},
+{a:"وَلَا تَجْعَلْ يَدَكَ مَغْلُولَةً إِلَىٰ عُنُقِكَ وَلَا تَبْسُطْهَا كُلَّ الْبَسْطِ",r:"الإسراء: ٢٩",
+opts:["البخل حتى على أدوات العمل والتطوير خوفاً من الصرف","التوازن المالي الذكي بين الادخار والاستثمار وعدم التبذير التافه","صرف كل الأموال على كماليات استهلاكية لأن الحياة قصيرة"],
+c:1,fb:"لا تبخل على أداة تحتاجها وتخسر بدونها زبوناً. ولا تصرف بغباء على ما لا قيمة له. التوازن هو الذكاء المالي الحقيقي."},
+{a:"يَا أَيُّهَا الَّذِينَ آمَنُوا اجْتَنِبُوا كَثِيرًا مِّنَ الظَّنِّ",r:"الحجرات: ١٢",
+opts:["بناء أحكامك على الحقائق والدلائل الواضحة لا على التخمين","الحكم على الشركاء والزبائن بناءً على شائعات وانطباعات فقط","قطع العلاقات بناءً على ظنون دون تحقق أو حوار مباشر"],
+c:0,fb:"مثلما لا تُبدّل قطعة سليمة بناءً على تخمين — لا تقطع شراكة أو تحكم على إنسان إلا بدليل. الظن يكسر الثقة ويدمر المشاريع."},
+{a:"وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا",r:"العنكبوت: ٦٩",
+opts:["الاستمرارية في السعي حتى عندما لا ترى نتيجة واضحة أمامك","الانتظار حتى تتضح الطريق الكاملة قبل أن تبدأ خطوة واحدة","المحاولة مرة واحدة فقط ثم الاستسلام إذا لم تنجح"],
+c:0,fb:"الطريق لا يظهر كاملاً قبل أن تمشي. من يستمر في المعافرة يجد الله يفتح له مسارات لم تكن في حسبانه أبداً."},
+{a:"خُذِ الْعَفْوَ وَأْمُرْ بِالْعُرْفِ وَأَعْرِضْ عَنِ الْجَاهِلِينَ",r:"الأعراف: ١٩٩",
+opts:["الدخول في كل نقاش وإثبات الحق في كل موقف مهما كلّف","حماية وقتك وتركيزك بالترفع عن مشتتي الانتباه والجدل العقيم","الرد بنفس أسلوب المستفز حفاظاً على الهيبة"],
+c:1,fb:"كل دقيقة تصرفها في نقاش لا قيمة له سُرقت من شغلك. الترفع عن الجاهل ليس ضعفاً — بل توفير طاقة للمعركة الحقيقية."},
+{a:"وَتَزَوَّدُوا فَإِنَّ خَيْرَ الزَّادِ التَّقْوَىٰ",r:"البقرة: ١٩٧",
+opts:["الاعتماد على المظهر والعلاقات فقط كزاد في السوق","التسلح بنظافة الضمير والتقوى كأقوى عدة لمواجهة أي تحدٍّ","إخفاء ضعف المنتج بالتسويق القوي وتأجيل المواجهة"],
+c:1,fb:"من يدخل السوق وضميره نظيف يملك ما لا يُشترى: الشجاعة في قول لا، والثبات في الأزمات، والنوم المريح بعد كل يوم عمل."},
+{a:"وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ",r:"النجم: ٣٩",
+opts:["انتظار الفرص تأتي وحدها بدون سعي حقيقي","الإيمان الراسخ بأن كل نقطة تصب في نهاية المطاف من عرقك أنت لا من غيرك","الاتكاء على الآخرين وتوقع النتائج بدون جهد شخصي"],
+c:1,fb:"لا توجد قصة نجاح بدون تعب شخصي. الورشة التي تبنيها بيدك هي فقط التي تبقى — كل ما بُني على جهد غيرك يمكن أن يُسحب منك."},
+{a:"إِنَّ اللَّهَ يُحِبُّ إِذَا عَمِلَ أَحَدُكُمْ عَمَلًا أَن يُتْقِنَهُ",r:"الطبراني — مرفوع",
+opts:["إنهاء أي مهمة بأي مستوى ما دام أُنجزت من الورقة","الإتقان في كل تفصيلة صغيرة حتى التي لا يراها الزبون","الاستعجال دائماً لأن الوقت أهم من الجودة"],
+c:1,fb:"حتى اللحامة التي لا يراها أحد في الهيكل — إذا كانت ضعيفة ستنكسر يوماً. الإتقان ليس للناس فقط، بل لله أولاً."},
+{a:"وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ ۚ عَلَيْهِ تَوَكَّلْتُ وَإِلَيْهِ أُنِيبُ",r:"هود: ٨٨",
+opts:["نسب النجاح لذكائك وجهدك فقط وتناسي مصدره الحقيقي","الجمع بين بذل أقصى جهد ممكن مع ربط النتيجة بالله وحده","الاسترخاء التام وعدم الاجتهاد بحجة أن الله هو المقرر"],
+c:1,fb:"التوفيق ليس خارج المعادلة — بل هو الذي يجعل مجهودك يُفضي لنتيجة. اعمل بأقصى طاقتك ثم سلّم الأمر، وكلاهما واجب."},
+{a:"قُلْ هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ وَالَّذِينَ لَا يَعْلَمُونَ",r:"الزمر: ٩",
+opts:["الاعتقاد بأن الخبرة والعلم لا فرق عملي بينهما في السوق","الفهم الراسخ أن العلم الحقيقي بمجالك يصنع فارقاً لا يُضاهى في النتائج","تفضيل التجربة العشوائية على التعلم المنظم دائماً"],
+c:1,fb:"الميكانيكي الذي يفهم نظام الإشعال من الجذر لا يشبه من يخمّن. العلم يختصر الوقت ويرفع الجودة ويُقلل الخطأ — الفارق واضح في كل يوم عمل."},
+{a:"فَاصْبِرْ إِنَّ وَعْدَ اللَّهِ حَقٌّ وَلَا يَسْتَخِفَّنَّكَ الَّذِينَ لَا يُوقِنُونَ",r:"الروم: ٦٠",
+opts:["التخلي عن المشروع حين يشكك فيه المحيطون","الثبات على الطريق الصحيح حتى حين يستهين بك من لا يرى ما تراه","تغيير اتجاهك بناءً على كل رأي سلبي تسمعه"],
+c:1,fb:"ستجد دائماً من يقول 'هذا لن ينجح'. الثبات لا يعني تجاهل النقد البنّاء — بل يعني ألا تُخلخل يقينك بكلمة من لا يُوقن بما تصنع."}
+];
+
+const LBL=['أ','ب','ج'];
+const AN=n=>n.toString().replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+const LB_KEY='tadabbur_lb_v2';
+
+let cur=0,score=0,answered=false,playerName='';
+
+function getLeaderboard(){
+  try{return JSON.parse(localStorage.getItem(LB_KEY))||[];}catch{return [];}
+}
+function saveLeaderboard(lb){
+  try{localStorage.setItem(LB_KEY,JSON.stringify(lb));}catch{}
+}
+function addScore(name,pts){
+  let lb=getLeaderboard();
+  const idx=lb.findIndex(x=>x.name===name);
+  if(idx>=0){if(pts>lb[idx].pts)lb[idx].pts=pts;}
+  else lb.push({name,pts});
+  lb.sort((a,b)=>b.pts-a.pts);
+  lb=lb.slice(0,10);
+  saveLeaderboard(lb);
+  return lb;
+}
+
+function renderLBPreview(){
+  const lb=getLeaderboard();
+  const el=document.getElementById('lb-preview-list');
+  if(!lb.length){el.innerHTML='<div class="lb-empty">لا يوجد سجلات بعد — كن الأول!</div>';return;}
+  const medals=['🥇','🥈','🥉'];
+  el.innerHTML=lb.slice(0,5).map((x,i)=>
+    `<div class="lb-row"><span class="lb-rank">${medals[i]||AN(i+1)}</span><span class="lb-name">${x.name}</span><span class="lb-pts">${AN(x.pts)}/٢٠</span></div>`
+  ).join('');
+}
+
+function renderLBResult(myName,myPts){
+  const lb=getLeaderboard();
+  const medals=['🥇','🥈','🥉'];
+  const rankClass=['gold','silver','bronze'];
+  document.getElementById('lb-result-list').innerHTML=lb.slice(0,7).map((x,i)=>{
+    const isMe=x.name===myName&&x.pts===myPts;
+    return `<div class="lb-result-row${isMe?' me':''}">
+      <span class="lb-rrank ${rankClass[i]||''}">${medals[i]||AN(i+1)}</span>
+      <span class="lb-rname${isMe?' me':''}">${x.name}${isMe?' ← أنت':''}</span>
+      <span class="lb-rpts">${AN(x.pts)}/٢٠</span>
+    </div>`;
+  }).join('');
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showNameScreen(){
+  renderLBPreview();
+  showScreen('screen-name');
+}
+
+function startGame(){
+  const inp=document.getElementById('player-name-input').value.trim();
+  if(!inp){document.getElementById('player-name-input').focus();return;}
+  playerName=inp;
+  cur=0;score=0;answered=false;
+  showScreen('screen-quiz');
+  document.getElementById('player-badge').textContent='اللاعب: '+playerName;
+  renderQ();
+}
+
+let shuffledCorrect=0;
+
+function renderQ(){
+  const q=Q[cur];
+  document.getElementById('qnum').textContent='الآية '+AN(cur+1)+' من ٢٠';
+  document.getElementById('scr').textContent='النقاط: '+AN(score);
+  document.getElementById('prog').style.width=((cur+1)/20*100)+'%';
+  document.getElementById('ayah').textContent=q.a;
+  document.getElementById('ref').textContent='[ '+q.r+' ]';
+  // shuffle options while tracking correct answer
+  const indices=[0,1,2];
+  for(let i=indices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[indices[i],indices[j]]=[indices[j],indices[i]];}
+  shuffledCorrect=indices.indexOf(q.c);
+  const oc=document.getElementById('opts');
+  oc.innerHTML='';
+  indices.forEach((origIdx,pos)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML='<span class="mark">'+LBL[pos]+'.</span> '+q.opts[origIdx];
+    b.onclick=(()=>{const p=pos;return()=>pick(p,b)})();
+    oc.appendChild(b);
+  });
+  document.getElementById('fb').style.display='none';
+  document.getElementById('nxt').style.display='none';
+  answered=false;
+}
+
+function pick(idx,btn){
+  if(answered)return;
+  answered=true;
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  const ok=idx===shuffledCorrect;
+  if(ok){btn.classList.add('correct');score++;}
+  else{btn.classList.add('wrong');document.querySelectorAll('.opt')[shuffledCorrect].classList.add('reveal');}
+  const fbt=document.getElementById('fbt');
+  fbt.className='fb-title '+(ok?'ok':'bad');
+  fbt.textContent=ok?'✓ صحيح':'✗ خطأ — الإجابة الصحيحة: '+LBL[shuffledCorrect];
+  document.getElementById('fbb').textContent=Q[cur].fb;
+  document.getElementById('fb').style.display='block';
+  document.getElementById('scr').textContent='النقاط: '+AN(score);
+  document.getElementById('nxt').style.display='block';
+}
+
+function nextQ(){
+  cur++;
+  if(cur>=Q.length){showResult();return;}
+  renderQ();
+}
+
+function showResult(){
+  const lb=addScore(playerName,score);
+  showScreen('screen-result');
+  document.getElementById('res-name').textContent=playerName;
+  document.getElementById('res-big').textContent=AN(score);
+  const ev=score>=18?'ممتاز جداً — تدبرك عميق وربطك بالواقع راسخ. أنت من الذين يعملون بما يعلمون.':
+            score>=15?'جيد جداً — قاعدتك قوية. بعض الآيات تحتاج تأمل أعمق ومراجعة.':
+            score>=10?'جيد — هناك فهم حقيقي لكنه يحتاج ممارسة وربطاً أعمق بالحياة اليومية.':
+            'تحتاج تأمل أكثر — الفهم العملي للآيات يأتي بالمعايشة والتطبيق. حاول مرة أخرى.';
+  document.getElementById('res-eval').textContent=ev;
+  renderLBResult(playerName,score);
+}
+
+function restart(){
+  cur=0;score=0;answered=false;
+  showScreen('screen-quiz');
+  renderQ();
+}
+
+// init
+renderLBPreview();
+</script>
+</body>
+</html>
